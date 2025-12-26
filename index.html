@@ -21,7 +21,6 @@
             font-family: "Segoe UI", Tahoma, sans-serif;
         }
 
-        /* خلفية الصفحة */
         body {
             margin: 0;
             min-height: 100vh;
@@ -31,7 +30,6 @@
             align-items: center;
         }
 
-        /* الكارد الرئيسي */
         .app {
             width: 340px;
             background: rgba(255, 255, 255, 0.08);
@@ -42,7 +40,6 @@
             color: #fff;
         }
 
-        /* العنوان */
         .app h1 {
             text-align: center;
             margin-bottom: 20px;
@@ -50,7 +47,6 @@
             letter-spacing: 1px;
         }
 
-        /* الحقول */
         .app input {
             width: 100%;
             padding: 12px;
@@ -67,7 +63,6 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
-        /* زر */
         .app button {
             width: 100%;
             padding: 12px;
@@ -91,7 +86,6 @@
             transform: translateY(0);
         }
 
-        /* عرض كلمة المرور */
         .result {
             margin-top: 18px;
             padding: 12px;
@@ -108,6 +102,17 @@
             font-weight: bold;
             color: #00eaff;
         }
+
+        /* رسالة الخطأ */
+        .error {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ffb3b3;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 
@@ -123,24 +128,40 @@
             const [Num_numbers, SetNum_numbers] = useState(0);
             const [Num_symbols, SetNum_symbols] = useState(0);
             const [Pass, SetPass] = useState("");
+            const [ErrorMsg, setErrorMsg] = useState("");
 
             const GeneratePass = async () => {
-                const Res = await axios.post("https://passwordgenertor5.onrender.com/Gen", {
-                    Num_letters,
-                    Num_numbers,
-                    Num_symbols,
-                });
+                const total = Num_letters + Num_numbers + Num_symbols;
 
-                if (Res.data.succeed) {
-                    SetPass(Res.data.Password);
-                } else {
-                    alert("Generator is falied ");
+                if (total > 32) {
+                    setErrorMsg("❌ مجموع الأحرف يجب ألا يتجاوز 32");
+                    return;
+                }
+
+                setErrorMsg(""); // مسح الرسالة إذا المجموع صحيح
+
+                try {
+                    const Res = await axios.post("https://passwordgenertor5.onrender.com/Gen", {
+                        Num_letters,
+                        Num_numbers,
+                        Num_symbols,
+                    });
+
+                    if (Res.data.succeed) {
+                        SetPass(Res.data.Password);
+                    } else {
+                        alert("Generator failed");
+                    }
+                } catch (err) {
+                    alert("Error connecting to server");
                 }
             };
 
             return (
                 <div className="app">
                     <h1>Password Generator</h1>
+
+                    {ErrorMsg && <div className="error">{ErrorMsg}</div>}
 
                     <input
                         type="number"
@@ -181,7 +202,4 @@
     </script>
 
 </body>
-
-
 </html>
-
